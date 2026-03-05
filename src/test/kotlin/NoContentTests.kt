@@ -12,6 +12,19 @@ import java.net.http.HttpClient as JavaHttpClient
 import java.net.http.HttpRequest as JavaHttpRequest
 import java.net.http.HttpResponse
 
+/**
+ * Integration tests demonstrating Ktor Java engine Content-Length: 0 bug on GET requests.
+ *
+ * Root cause: Ktor's JavaHttpRequest.kt uses `method("GET", BodyPublishers.noBody())` instead of
+ * `.GET()`. The JDK HttpClient sends `Content-Length: 0` when using `method()` with any body
+ * publisher (even noBody()), but `.GET()` sends no Content-Length header at all.
+ * Some servers (e.g. Newcastle Permanent's WAF) reject GET requests with Content-Length: 0.
+ *
+ * Bug location: ktor-client-java/jvm/src/io/ktor/client/engine/java/JavaHttpRequest.kt line 54
+ * Fix: Use `.GET()` / `.HEAD()` / `.DELETE()` for NoContent bodies instead of `.method(name, noBody())`
+ *
+ * Remarks: These can intermittently fail if a financial institution's CDR API is down.
+ */
 class NoContentTests {
 
     private val url = "https://openbank.newcastlepermanent.com.au/cds-au/v1/banking/products?product-category=RESIDENTIAL_MORTGAGES&page-size=50"

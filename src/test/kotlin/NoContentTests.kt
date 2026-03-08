@@ -2,6 +2,7 @@ package org.example
 
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.client.utils.EmptyContent
 import io.ktor.http.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -86,6 +87,8 @@ class NoContentTests {
         val response = client.get(url) {
             header("x-v", "5")
             header("x-min-v", "3")
+            // This makes no difference
+            // setBody(EmptyContent)
         }
         val body = response.bodyAsText()
 
